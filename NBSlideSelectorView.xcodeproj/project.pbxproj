@@ -426,6 +426,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = NBSlideSelectorView/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.napoleonbai.NBSlideSelectorView;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -437,6 +438,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = NBSlideSelectorView/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.napoleonbai.NBSlideSelectorView;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -510,6 +512,7 @@
 				44DE2B7E1C0ECC1900DAB656 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		44DE2B7F1C0ECC1900DAB656 /* Build configuration list for PBXNativeTarget "NBSlideSelectorViewTests" */ = {
 			isa = XCConfigurationList;
@@ -518,6 +521,7 @@
 				44DE2B811C0ECC1900DAB656 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		44DE2B821C0ECC1900DAB656 /* Build configuration list for PBXNativeTarget "NBSlideSelectorViewUITests" */ = {
 			isa = XCConfigurationList;
@@ -526,6 +530,7 @@
 				44DE2B841C0ECC1900DAB656 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

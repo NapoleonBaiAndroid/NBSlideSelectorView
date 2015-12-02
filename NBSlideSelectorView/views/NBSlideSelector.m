@@ -40,6 +40,11 @@ static NSString *contentCellIdentifier = @"contentCellIdentifier";
  */
 @property(nonatomic,strong)UICollectionView *bottomCollectionView;
 
+/**
+ *  当前选中的
+ */
+@property(nonatomic,strong)UILabel *currentLabel;
+
 @end
 
 @implementation NBSlideSelector
@@ -75,7 +80,7 @@ static NSString *contentCellIdentifier = @"contentCellIdentifier";
 - (UIScrollView *)topTitleScrollView{
     if (!_topTitleScrollView) {
         _topTitleScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, self.viewWidth,VIEW_HEIGHT)];
-        _topTitleScrollView.delegate = self;
+        //_topTitleScrollView.delegate = self;
         _topTitleScrollView.backgroundColor = [UIColor clearColor];
         _topTitleScrollView.pagingEnabled = NO;
         _topTitleScrollView.showsHorizontalScrollIndicator = NO;
@@ -116,6 +121,9 @@ static NSString *contentCellIdentifier = @"contentCellIdentifier";
 - (void)initBottomTitles{
     for (int i = 0; i < self.titlesArray.count; i ++) {
         UILabel *bottomLabel = [self createLabelWithTitlesIndex:i textColor:self.titleNormalColor];
+        if (!self.currentLabel) {
+            self.currentLabel = bottomLabel;
+        }
         bottomLabel.userInteractionEnabled = YES;
         [bottomLabel addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickTitleButton:)]];
         bottomLabel.tag = i;
@@ -138,6 +146,7 @@ static NSString *contentCellIdentifier = @"contentCellIdentifier";
 - (void)clickTitleButton:(UITapGestureRecognizer *)tap{
     UILabel *label = (UILabel *)tap.view;
     if (label.tag >= 0 && label.tag < self.titlesArray.count) {
+        self.currentLabel = label;
         CGRect frame = label.frame;
         CGRect changeFrame = CGRectMake(-frame.origin.x, 0, frame.size.width, frame.size.height);
         
@@ -243,7 +252,7 @@ static NSString *contentCellIdentifier = @"contentCellIdentifier";
         flowLayout.minimumLineSpacing = 0;
         flowLayout.minimumInteritemSpacing = 0;
         flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
-        
+
         _bottomCollectionView = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:flowLayout];
         _bottomCollectionView.dataSource = self;
         _bottomCollectionView.delegate = self;
@@ -291,6 +300,75 @@ static NSString *contentCellIdentifier = @"contentCellIdentifier";
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
     return self.titlesArray.count;
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    
+    //此处移动，将要改变顶部视图
+    //if scrollView.conentOffsetX
+    //如果移动1/2， 那么 x ＝ b1.width／2 ，y ＝ 0，width ＝ b1.width／2 ＋ b2.width／2，b1.height
+    //同理
+    float move = fmodf(scrollView.contentOffset.x,self.bottomCollectionView.bounds.size.width) / self.bottomCollectionView.bounds.size.width;//scrollView.contentOffset.x % self.bottomCollectionView.bounds.size.width;
+    
+    NSLog(@"move ====%.2f",move);
+    
+    //self.currentSelected = scrollView.contentOffset.x % self.bottomCollectionView.bounds.size.width;
+    if (self.currentLabel.tag >= 0 && self.currentLabel.tag < self.titlesArray.count) {
+        
+        CGRect currentFrame = self.currentLabel.frame;
+        
+        static float newx = 0;
+        static float oldIx = 0;
+        newx= scrollView.contentOffset.x ;
+        
+        UILabel *nextLabel;
+        if (newx != oldIx) {
+            //Left-YES,Right-NO
+            if (newx > oldIx)  {
+                //left
+                //得到下一个titleLabel
+                nextLabel = self.bottomTitleLabelsArray[self.currentLabel.tag +1];
+                
+                CGRect frame = CGRectMake(currentFrame.size.width * move, 0, currentFrame.size.width * (1-move) + nextLabel.frame.size.width * move, nextLabel.frame.size.height);
+                CGRect changeFrame = CGRectMake(-frame.origin.x, 0, frame.size.width, frame.size.height);
+
+                self.backgroundHightLightView.frame = frame;
+                self.topTitleHeightLightView.frame = changeFrame;
+
+                
+            }else if(newx < oldIx){
+                //right
+                
+                
+            }
+            oldIx = newx;
+        }
+        
+        if (fmodf(scrollView.contentOffset.x,self.bottomCollectionView.bounds.size.width) == 0) {
+            self.currentLabel = nextLabel;
+        }
+        
+        
+        /*
+        CGRect frame = self.currentLabel.frame;
+        CGRect changeFrame = CGRectMake(-frame.origin.x, 0, frame.size.width, frame.size.height);
+        
+        [UIView animateWithDuration:.25 animations:^{
+            self.backgroundHightLightView.frame = frame;
+            self.topTitleHeightLightView.frame = changeFrame;
+        } completion:^(BOOL finished) {
+            //动画结束完执行
+            
+        }];
+         */
+    }
+    
+    
+
+    /*
+    self.backgroundHightLightView.frame = frame;
+    self.topTitleHeightLightView.frame = changeFrame;
+     */
 }
 
 
