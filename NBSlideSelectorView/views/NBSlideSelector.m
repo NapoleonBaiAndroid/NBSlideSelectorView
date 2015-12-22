@@ -45,6 +45,8 @@ static NSString *contentCellIdentifier = @"contentCellIdentifier";
  */
 @property(nonatomic,strong)UILabel *currentLabel;
 
+@property(nonatomic,strong)UILabel *nextLabel;
+
 @end
 
 @implementation NBSlideSelector
@@ -162,6 +164,12 @@ static NSString *contentCellIdentifier = @"contentCellIdentifier";
         if (label.center.x < (self.topTitleScrollView.contentOffset.x + self.frame.size.width*0.5) || label.center.x > self.frame.size.width*0.5) {
             [self.topTitleScrollView scrollRectToVisible:CGRectMake(self.topTitleScrollView.contentOffset.x + label.center.x - (self.topTitleScrollView.contentOffset.x + self.frame.size.width*0.5), 0, self.frame.size.width, self.frame.size.height) animated:YES];
         }
+        
+        [self.bottomCollectionView scrollRectToVisible:CGRectMake(label.tag * self.bottomCollectionView.bounds.size.width, 0, self.bottomCollectionView.bounds.size.width, self.bottomCollectionView.bounds.size.height) animated:YES];
+        
+        NSLog(@"===backgroundHightLightView===%@",NSStringFromCGRect(self.backgroundHightLightView.frame));
+        NSLog(@"===topTitleHeightLightView===%@",NSStringFromCGRect(self.topTitleHeightLightView.frame));
+
     }
 }
 
@@ -302,69 +310,75 @@ static NSString *contentCellIdentifier = @"contentCellIdentifier";
     return self.titlesArray.count;
 }
 
+//移动之后的x坐标点
+static float newx = 0;
+//移动之前的x坐标点
+static float oldIx = 0;
+
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView{
     
     //此处移动，将要改变顶部视图
     //if scrollView.conentOffsetX
     //如果移动1/2， 那么 x ＝ b1.width／2 ，y ＝ 0，width ＝ b1.width／2 ＋ b2.width／2，b1.height
     //同理
-    float move = fmodf(scrollView.contentOffset.x,self.bottomCollectionView.bounds.size.width) / self.bottomCollectionView.bounds.size.width;//scrollView.contentOffset.x % self.bottomCollectionView.bounds.size.width;
+    //得到当前移动的距离与当前内容视图的宽度比
+    float move = fmodf(scrollView.contentOffset.x,self.bottomCollectionView.bounds.size.width) / self.bottomCollectionView.bounds.size.width;
+    
+    //scrollView.contentOffset.x % self.bottomCollectionView.bounds.size.width;
     
     NSLog(@"move ====%.2f",move);
     
     //self.currentSelected = scrollView.contentOffset.x % self.bottomCollectionView.bounds.size.width;
     if (self.currentLabel.tag >= 0 && self.currentLabel.tag < self.titlesArray.count) {
-        
+        //当前高亮的frame
         CGRect currentFrame = self.currentLabel.frame;
         
-        static float newx = 0;
-        static float oldIx = 0;
-        newx= scrollView.contentOffset.x ;
-        
-        UILabel *nextLabel;
-        if (newx != oldIx) {
+        newx= scrollView.contentOffset.x;
+
+        //如果两个坐标不相同，则认为移动过
+        if (newx != oldIx && move !=0) {
             //Left-YES,Right-NO
             if (newx > oldIx)  {
                 //left
                 //得到下一个titleLabel
-                nextLabel = self.bottomTitleLabelsArray[self.currentLabel.tag +1];
-                
-                CGRect frame = CGRectMake(currentFrame.size.width * move, 0, currentFrame.size.width * (1-move) + nextLabel.frame.size.width * move, nextLabel.frame.size.height);
+                if (self.currentLabel.tag +1 >= self.bottomTitleLabelsArray.count) {
+                    return;
+                }
+                self.nextLabel = self.bottomTitleLabelsArray[self.currentLabel.tag + 1];
+                //得到高亮背景frame
+                CGRect frame = CGRectMake(currentFrame.origin.x + currentFrame.size.width * move, 0, currentFrame.size.width * (1-move) + self.nextLabel.frame.size.width * move, self.nextLabel.frame.size.height);
+                //
                 CGRect changeFrame = CGRectMake(-frame.origin.x, 0, frame.size.width, frame.size.height);
 
                 self.backgroundHightLightView.frame = frame;
                 self.topTitleHeightLightView.frame = changeFrame;
 
-                
             }else if(newx < oldIx){
+                if (self.currentLabel.tag -1 < 0) {
+                    return;
+                }
                 //right
+                self.nextLabel = self.bottomTitleLabelsArray[self.currentLabel.tag - 1];
+                //得到高亮背景frame
+                CGRect frame = CGRectMake(currentFrame.origin.x - self.nextLabel.frame.size.width * (1-move), 0, currentFrame.size.width * move + self.nextLabel.frame.size.width * (1-move), self.nextLabel.frame.size.height);
+                //
+                CGRect changeFrame = CGRectMake(-frame.origin.x, 0, frame.size.width, frame.size.height);
                 
-                
+                self.backgroundHightLightView.frame = frame;
+                self.topTitleHeightLightView.frame = changeFrame;
             }
+            //执行完成后，替换oldIx
             oldIx = newx;
         }
         
         if (fmodf(scrollView.contentOffset.x,self.bottomCollectionView.bounds.size.width) == 0) {
-            self.currentLabel = nextLabel;
-        }
-        
-        
-        /*
-        CGRect frame = self.currentLabel.frame;
-        CGRect changeFrame = CGRectMake(-frame.origin.x, 0, frame.size.width, frame.size.height);
-        
-        [UIView animateWithDuration:.25 animations:^{
-            self.backgroundHightLightView.frame = frame;
-            self.topTitleHeightLightView.frame = changeFrame;
-        } completion:^(BOOL finished) {
-            //动画结束完执行
+            self.currentLabel = self.nextLabel;
             
-        }];
-         */
+            NSLog(@"===backgroundHightLightView===%@",NSStringFromCGRect(self.backgroundHightLightView.frame));
+            NSLog(@"===topTitleHeightLightView===%@",NSStringFromCGRect(self.topTitleHeightLightView.frame));
+        }
     }
     
-    
-
     /*
     self.backgroundHightLightView.frame = frame;
     self.topTitleHeightLightView.frame = changeFrame;
