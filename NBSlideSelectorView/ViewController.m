@@ -7,7 +7,8 @@
 //
 
 #import "ViewController.h"
-#import "NBSlideSelector.h"
+#import "NBSliderView.h"
+#import "testViewController.h"
 
 @interface ViewController ()
 
@@ -18,12 +19,25 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    NBSlideSelector *selider = [[NBSlideSelector alloc]initWithFrame:CGRectMake(0, 64, self.view.frame.size.width, self.view.frame.size.height)];
-    selider.titlesArray = @[@"如果",@"你也喜欢",@"小白杨",@"那",@"就点个",@"赞吧",@"非常感谢",@"感谢所有的一切"];
-    selider.backgroundHightLightColor = [UIColor greenColor];
-    selider.titleHightLightColor = [UIColor yellowColor];
-    selider.titleNormalColor = [UIColor redColor];
-    [self.view addSubview:selider];
+    NBSliderView *sliderView = [[NBSliderView alloc]initWithFrame:CGRectMake(0, 64, self.view.frame.size.width, self.view.frame.size.height)];
+    sliderView.titlesArray = @[@"如果",@"你也喜欢",@"小白杨",@"那",@"就点个",@"赞吧",@"非常感谢",@"感谢所有的一切"];
+    sliderView.backgroundHightLightColor = [UIColor greenColor];
+    sliderView.titleHightLightColor = [UIColor yellowColor];
+    sliderView.titleNormalColor = [UIColor redColor];
+//    sliderView.titleViewWidth = 100;
+    NSMutableArray *tempArray = @[].mutableCopy;
+    for (int i = 0; i< sliderView.titlesArray.count; i++) {
+        testViewController *test = [testViewController new];
+        UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:test];
+        [self addChildViewController:nav];
+        [tempArray addObject:nav.view];
+    }
+    sliderView.contentArray = tempArray;
+    
+    sliderView.scrollToPageBlock= ^(NSInteger pageIndex){
+        NSLog(@"滑动到====>>>%ld",pageIndex);
+    };
+    [self.view addSubview:sliderView];
 }
 
 - (void)didReceiveMemoryWarning {
